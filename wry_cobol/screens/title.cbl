@@ -58,4 +58,4 @@
            05 LINE + 1.
            05 LINE + 1.
            05 COL 1, LINE + 1.
-           05 RESPONSE-INPUT PIC X TO WS-TEST-VAR.
+           05 RESPONSE-INPUT PIC X TO WS-TITLE-INPUT.

@@ -19,10 +19,6 @@
                    ASSIGN TO "../data/story-text.dat"
                    ORGANIZATION IS LINE SEQUENTIAL.
 
-               SELECT FD-TITLE-FILE
-                   ASSIGN TO '../data/title.dat'
-                   ORGANIZATION IS LINE SEQUENTIAL.
-
        DATA DIVISION.
 
        FILE SECTION.
@@ -42,17 +38,13 @@
            05 STORY-TEXT-ID                    PIC 9(4).
            05 STORY-TEXT                       PIC X(255).
 
-       FD  FD-TITLE-FILE.
-       01  FD-TITLE-TEXT.
-           88 EOF-TITLE                        VALUE HIGH-VALUES.
-           05 TITLE-TEXT                       PIC X(120).
-
        WORKING-STORAGE SECTION.
 
        77  WS-VERSION-NUM                      PIC X(5) VALUE "0.001".
        77  WS-CURRENT-RECORD                   PIC 9(4) VALUE 0000.
 
-       77  WS-TEST-VAR                         PIC X.
+       77  WS-TITLE-INPUT                      PIC X.
+       77  WS-STORY-INPUT                      PIC 9(1).
 
        01  WS-EOF-SW                           PIC X(1) VALUE 'N'.
            88 EOF-SW                           VALUE 'Y'.
@@ -63,7 +55,7 @@
            05 WS-CORRECT-STORY-ID              PIC 9(4).
            05 WS-CORRECT-CHOICE-ID             PIC 9(1).
            05 WS-CHOICES                       OCCURS 4 TIMES.
-               10 WS-CHOICES-TEXT              PIC X(50).
+               10 WS-CHOICES-TEXT              PIC X(9).
 
        01  WS-STORY-TEXT-RECORD.
            05 WS-STORY-TEXT-ID                 PIC 9(4).
@@ -73,9 +65,13 @@
            88 RECORD-FOUND                     VALUE 'Y'.
            88 RECORD-NOT-FOUND                 VALUE 'N'.
 
-
        SCREEN SECTION.
+
+       COPY 'screens/blank.cbl'.
+
        COPY 'screens/title.cbl'.
+
+       COPY 'screens/story.cbl'.
 
 
        PROCEDURE DIVISION.
@@ -84,11 +80,8 @@
            DISPLAY TITLE-SCREEN
            ACCEPT TITLE-SCREEN
 
-      *>     PERFORM 300-READ-TITLE
-      *>     ACCEPT WS-VERSION-NUM FROM CONSOLE
+           PERFORM 100-READ-STORY
 
-      *>     DISPLAY 'READING STORY FILE...'
-      *>     PERFORM 100-READ-STORY
 
            STOP RUN.
 
@@ -99,14 +92,18 @@
                    READ FD-STORY-FILE INTO WS-STORY-RECORD
                        AT END SET EOF-STORY TO TRUE
                        NOT AT END
-                           DISPLAY WS-STORY-ID
-                           DISPLAY WS-CORRECT-STORY-ID
-                           DISPLAY WS-CORRECT-CHOICE-ID
-                           DISPLAY WS-CHOICES(1)
+      *                     DISPLAY WS-STORY-ID
+      *                     DISPLAY WS-CORRECT-STORY-ID
+      *                     DISPLAY WS-CORRECT-CHOICE-ID
+      *                     DISPLAY WS-CHOICES(1)
 
                            PERFORM 200-READ-STORY-TEXT
 
-                       DISPLAY '***********NEXT-RECORD************'
+                           DISPLAY BLANK-SCREEN
+                           DISPLAY STORY-SCREEN
+                           ACCEPT STORY-SCREEN
+
+
                    END-READ
                END-PERFORM
            CLOSE FD-STORY-FILE.
@@ -114,33 +111,21 @@
 
        200-READ-STORY-TEXT.
            OPEN INPUT FD-STORY-TEXT-FILE
-               DISPLAY 'Reading story data'
+      *         DISPLAY 'Reading story data'
                PERFORM UNTIL EOF-SW OR RECORD-FOUND
-                   DISPLAY 'Not at eof so reading story...'
+      *             DISPLAY 'Not at eof so reading story...'
                    READ FD-STORY-TEXT-FILE INTO WS-STORY-TEXT-RECORD
                        AT END MOVE 'Y' TO WS-EOF-SW
                        NOT AT END
                            IF WS-STORY-TEXT-ID = WS-STORY-ID
-                               DISPLAY WS-STORY-TEXT
+      *                         DISPLAY WS-STORY-TEXT
                                MOVE 'Y' TO WS-STORY-TEXT-RECORD-FOUND
                            END-IF
                    END-READ
                END-PERFORM
-               DISPLAY 'Done story data perform.. clsoing file'
+      *         DISPLAY 'Done story data perform.. clsoing file'
            CLOSE FD-STORY-TEXT-FILE
            MOVE 'N' TO WS-EOF-SW
            MOVE 'N' TO WS-STORY-TEXT-RECORD-FOUND.
-
-
-       300-READ-TITLE.
-           OPEN INPUT FD-TITLE-FILE
-               PERFORM UNTIL EOF-TITLE
-                   READ FD-TITLE-FILE
-                       AT END SET EOF-TITLE TO TRUE
-                       NOT AT END
-                           DISPLAY TITLE-TEXT
-                   END-READ
-               END-PERFORM
-           CLOSE FD-TITLE-FILE.
 
        END PROGRAM WRY-COBOL.
