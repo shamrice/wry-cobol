@@ -1,8 +1,12 @@
-10001CHOICE1
-10002CHOICE2
-10003CHOICE3
-10004CHOICE4
-10031CHOICE 1 for story screen 3
-10032CHOICE 2 for story screen 3
-10033CHOICE 3 for story screen 3
-10034CHOICE 4 for story screen 3
+100011) This is the first choice
+100022) This is the second choice
+100033) Hello number three!
+100044) And here we are at the last one.
+100111) Second screen choice 1
+100122) This is the second choice of screen 2
+100133) lalala
+100144) Grandma arachnid!
+100211) Surprise only three on this one
+100222) Yep. number four is not filled in
+100233) ...and it won't be!
+100311) Only choice here buster...

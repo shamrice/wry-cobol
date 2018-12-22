@@ -31,10 +31,10 @@
        01  FD-STORY-RECORD.
            05 EPISODE-ID                       PIC 9(1).
            05 STORY-ID                         PIC 9(3).
-           05 CORRECT-STORY-ID                 PIC 9(4).
+           05 CORRECT-STORY-ID                 PIC 9(3).
            05 CORRECT-CHOICE-ID                PIC 9(1).
-           05 CHOICES                          OCCURS 4 TIMES.
-               10 CHOICE-TEXT                  PIC X(50).
+      *     05 CHOICES                          OCCURS 4 TIMES.
+      *         10 CHOICE-TEXT                  PIC X(50).
 
        FD  FD-STORY-TEXT-FILE.
        01  FD-STORY-TEXT-RECORD.
@@ -45,7 +45,7 @@
        FD  FD-STORY-CHOICE-FILE.
        01  FD-STORY-CHOICE-RECORD.
            05 STORY-CHOICE-EPISODE-ID          PIC 9(1).
-           05 STORY-CHOICE-STORY-ID            PIC 9(4).
+           05 STORY-CHOICE-STORY-ID            PIC 9(3).
            05 STORY-CHOICE-ID                  PIC 9(1).
            05 STORY-CHOICE-TEXT                PIC X(255).
 
@@ -71,10 +71,10 @@
            88 EOF-STORY                        VALUE HIGH-VALUES.
            05 WS-EPISODE-ID                    PIC 9(1).
            05 WS-STORY-ID                      PIC 9(3).
-           05 WS-CORRECT-STORY-ID              PIC 9(4).
+           05 WS-CORRECT-STORY-ID              PIC 9(3).
            05 WS-CORRECT-CHOICE-ID             PIC 9(1).
            05 WS-CHOICES                       OCCURS 4 TIMES.
-               10 WS-CHOICES-TEXT              PIC X(9).
+               10 WS-CHOICES-TEXT              PIC X(255).
 
        01  WS-STORY-TEXT-RECORD.
            05 WS-STORY-TEXT-EPISODE-ID         PIC 9(1).
@@ -83,7 +83,7 @@
 
        01  WS-STORY-CHOICE-RECORD.
            05 WS-STORY-CHOICE-EPISODE-ID       PIC 9(1).
-           05 WS-STORY-CHOICE-STORY-ID         PIC 9(4).
+           05 WS-STORY-CHOICE-STORY-ID         PIC 9(3).
            05 WS-STORY-CHOICE-ID               PIC 9(1).
            05 WS-STORY-CHOICE-TEXT             PIC X(255).
 
@@ -111,6 +111,10 @@
            END-PERFORM
 
            STOP RUN.
+
+
+       050-DEBUG-MESSAGE.
+           call 'SYSTEM' using 'echo debug message to console'.
 
        100-MAIN-MENU.
 
@@ -194,29 +198,30 @@
 
 
        450-READ-STORY-CHOICES.
-      *     OPEN INPUT FD-STORY-CHOICE-FILE
-      *         PERFORM UNTIL EOF-SW OR RECORD-FOUND
-      *             READ FD-STORY-CHOICE-FILE INTO WS-STORY-CHOICE-RECORD
-      *                 AT END MOVE 'Y' TO WS-EOF-SW
-      *                 NOT AT END
-      *                     IF WS-STORY-CHOICE-STORY-ID = WS-STORY-ID
-      *                     AND WS-STORY-CHOICE-EPISODE-ID
-      *                         = WS-EPISODE-ID
-                               DISPLAY '***********FOUND CHOICE******'
-      *                         MOVE WS-STORY-CHOICE-TEXT TO
-      *                             WS-CHOICES-TEXT(1)
-      *                         MOVE 'Y' TO WS-STORY-RECORD-FOUND
-      *                     END-IF
-      *             END-READ
-      *         END-PERFORM
-      *     CLOSE FD-STORY-TEXT-FILE
+
+           OPEN INPUT FD-STORY-CHOICE-FILE
+               PERFORM UNTIL EOF-SW OR RECORD-FOUND
+                   READ FD-STORY-CHOICE-FILE INTO WS-STORY-CHOICE-RECORD
+                       AT END MOVE 'Y' TO WS-EOF-SW
+                       NOT AT END
+                           IF WS-STORY-CHOICE-STORY-ID = WS-STORY-ID
+                           AND WS-STORY-CHOICE-EPISODE-ID
+                               = WS-EPISODE-ID
+                               MOVE WS-STORY-CHOICE-TEXT TO
+                                   WS-CHOICES-TEXT(WS-STORY-CHOICE-ID)
+                               IF WS-STORY-CHOICE-ID = 4
+                                   MOVE 'Y' TO WS-STORY-RECORD-FOUND
+                               END-IF
+                           END-IF
+                   END-READ
+               END-PERFORM
+           CLOSE FD-STORY-CHOICE-FILE
            MOVE 'N' TO WS-EOF-SW
            MOVE 'N' TO WS-STORY-RECORD-FOUND.
 
 
        500-HANDLE-STORY-IO.
            DISPLAY BLANK-SCREEN
-           DISPLAY STORY-SCREEN
            ACCEPT STORY-SCREEN
 
            IF WS-STORY-INPUT NOT = WS-CORRECT-CHOICE-ID
