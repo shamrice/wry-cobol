@@ -42,10 +42,6 @@
        01  FD-STORY-RECORD.
            05 EPISODE-ID                       PIC 9(1).
            05 STORY-ID                         PIC 9(3).
-      *     05 CORRECT-STORY-ID                 PIC 9(3).
-      *     05 CORRECT-CHOICE-ID                PIC 9(1).
-      *     05 CHOICES                          OCCURS 4 TIMES.
-      *         10 CHOICE-TEXT                  PIC X(50).
 
        FD  FD-STORY-TEXT-FILE.
        01  FD-STORY-TEXT-RECORD.
@@ -91,8 +87,6 @@
            88 EOF-STORY                        VALUE HIGH-VALUES.
            05 WS-EPISODE-ID                    PIC 9(1).
            05 WS-STORY-ID                      PIC 9(3).
-      *     05 WS-CORRECT-STORY-ID              PIC 9(3).
-      *     05 WS-CORRECT-CHOICE-ID             PIC 9(1).
            05 WS-CHOICES                       OCCURS 0 TO 4 TIMES.
                10 WS-CHOICE-TEXT               PIC X(255).
                10 WS-CHOICE-DESTINATION        PIC 9(3).
@@ -167,7 +161,7 @@
                MOVE WS-EP-MENU-INPUT TO WS-CURRENT-EPISODE
 
                PERFORM 300-READ-STORY-START
-               PERFORM 350-READ-STORY
+               PERFORM 325-RUN-STORY
 
                PERFORM 105-RESET-STORY
                PERFORM 110-RESET-MENU-INPUT
@@ -333,13 +327,7 @@
            DISPLAY BLANK-SCREEN
            ACCEPT STORY-SCREEN
 
-           MOVE WS-CHOICE-DESTINATION( WS-STORY-INPUT)
+           MOVE WS-CHOICE-DESTINATION(WS-STORY-INPUT)
                TO WS-CURRENT-RECORD.
-
-      *     IF WS-STORY-INPUT NOT = WS-CORRECT-CHOICE-ID
-      *         MOVE 'Y' TO WS-GAMEOVER-SW
-      *     ELSE
-      *         MOVE WS-CORRECT-STORY-ID TO WS-CURRENT-RECORD
-      *     END-IF.
 
        END PROGRAM WRY-COBOL.
