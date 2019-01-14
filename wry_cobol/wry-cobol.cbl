@@ -11,6 +11,11 @@
 
        INPUT-OUTPUT SECTION.
            FILE-CONTROL.
+
+               SELECT FD-STORY-START-FILE
+                   ASSIGN TO '../data/story-start.dat'
+                   ORGANIZATION IS LINE SEQUENTIAL.
+
                SELECT FD-STORY-FILE
                    ASSIGN TO '../data/story.dat'
                    ORGANIZATION IS LINE SEQUENTIAL.
@@ -26,6 +31,11 @@
        DATA DIVISION.
 
        FILE SECTION.
+
+       FD  FD-STORY-START-FILE.
+       01  FD-STORY-START-FILE-RECORD.
+           05 EPISODE-ID                       PIC 9(1).
+           05 STORY-ID                         PIC 9(3).
 
        FD  FD-STORY-FILE.
        01  FD-STORY-RECORD.
@@ -67,13 +77,17 @@
            88 EOF-SW                           VALUE 'Y'.
            88 NOT-EOF-SW                       VALUE 'N'.
 
+       01  WS-STORY-START-RECORD.
+           05 WS-STORY-START-EPISODE-ID        PIC 9(1).
+           05 WS-STORY-START-STORY-ID          PIC 9(3).
+
        01  WS-STORY-RECORD.
            88 EOF-STORY                        VALUE HIGH-VALUES.
            05 WS-EPISODE-ID                    PIC 9(1).
            05 WS-STORY-ID                      PIC 9(3).
            05 WS-CORRECT-STORY-ID              PIC 9(3).
            05 WS-CORRECT-CHOICE-ID             PIC 9(1).
-           05 WS-CHOICES                       OCCURS 4 TIMES.
+           05 WS-CHOICES                       OCCURS 0 TO 4 TIMES.
                10 WS-CHOICES-TEXT              PIC X(255).
 
        01  WS-STORY-TEXT-RECORD.
@@ -130,13 +144,14 @@
 
                DISPLAY BLANK-SCREEN
 
-               PERFORM UNTIL WS-EP-MENU-INPUT < 4
+               PERFORM UNTIL WS-EP-MENU-INPUT <= 4
                AND WS-EP-MENU-INPUT > 0
                    ACCEPT EPISODE-MENU-SCREEN
                END-PERFORM
 
                MOVE WS-EP-MENU-INPUT TO WS-CURRENT-EPISODE
 
+               PERFORM 290-READ-STORY-START
                PERFORM 300-READ-STORY
 
                PERFORM 105-RESET-STORY
@@ -159,6 +174,21 @@
            DISPLAY BLANK-SCREEN
            ACCEPT ABOUT-SCREEN.
 
+       290-READ-STORY-START.
+
+           OPEN INPUT FD-STORY-START-FILE
+               PERFORM UNTIL EOF-SW
+                   READ FD-STORY-START-FILE INTO WS-STORY-START-RECORD
+                       AT END MOVE 'Y' TO WS-EOF-SW
+                   NOT AT END
+                       IF WS-STORY-START-EPISODE-ID = WS-CURRENT-EPISODE
+                           MOVE WS-STORY-START-RECORD
+                               TO WS-CURRENT-RECORD
+                       END-IF
+                   END-READ
+               END-PERFORM
+           CLOSE FD-STORY-START-FILE
+           MOVE 'N' TO WS-EOF-SW.
 
        300-READ-STORY.
 
@@ -168,7 +198,7 @@
                        AT END MOVE 'Y' TO WS-EOF-SW
                        NOT AT END
                            IF WS-EPISODE-ID = WS-CURRENT-EPISODE
-                           AND WS-CURRENT-RECORD = WS-STORY-ID
+      *>                     AND WS-CURRENT-RECORD = WS-STORY-ID
                                PERFORM 400-READ-STORY-TEXT
                                PERFORM 450-READ-STORY-CHOICES
                                PERFORM 500-HANDLE-STORY-IO
