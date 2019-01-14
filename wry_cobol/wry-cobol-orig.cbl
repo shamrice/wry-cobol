@@ -1,4 +1,3 @@
-
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Date: 12/16/2018
@@ -42,8 +41,8 @@
        01  FD-STORY-RECORD.
            05 EPISODE-ID                       PIC 9(1).
            05 STORY-ID                         PIC 9(3).
-      *     05 CORRECT-STORY-ID                 PIC 9(3).
-      *     05 CORRECT-CHOICE-ID                PIC 9(1).
+           05 CORRECT-STORY-ID                 PIC 9(3).
+           05 CORRECT-CHOICE-ID                PIC 9(1).
       *     05 CHOICES                          OCCURS 4 TIMES.
       *         10 CHOICE-TEXT                  PIC X(50).
 
@@ -57,15 +56,10 @@
        01  FD-STORY-CHOICE-RECORD.
            05 STORY-CHOICE-EPISODE-ID          PIC 9(1).
            05 STORY-CHOICE-STORY-ID            PIC 9(3).
-           05 STORY-CHOICE-DEST-STORY-ID       PIC 9(3).
            05 STORY-CHOICE-ID                  PIC 9(1).
            05 STORY-CHOICE-TEXT                PIC X(255).
 
        WORKING-STORAGE SECTION.
-
-       77  WS-DEBUG-PREFIX                     PIC X(5) VALUE 'echo'.
-       77  WS-DEBUG-MSG                        PIC X(255).
-       77  WS-DEBUG-CONCAT                     PIC X(300).
 
        77  WS-TITLE-INPUT                      PIC X.
        77  WS-MENU-INPUT                       PIC 9 VALUE 0.
@@ -91,11 +85,10 @@
            88 EOF-STORY                        VALUE HIGH-VALUES.
            05 WS-EPISODE-ID                    PIC 9(1).
            05 WS-STORY-ID                      PIC 9(3).
-      *     05 WS-CORRECT-STORY-ID              PIC 9(3).
-      *     05 WS-CORRECT-CHOICE-ID             PIC 9(1).
+           05 WS-CORRECT-STORY-ID              PIC 9(3).
+           05 WS-CORRECT-CHOICE-ID             PIC 9(1).
            05 WS-CHOICES                       OCCURS 0 TO 4 TIMES.
-               10 WS-CHOICE-TEXT               PIC X(255).
-               10 WS-CHOICE-DESTINATION        PIC 9(3).
+               10 WS-CHOICES-TEXT              PIC X(255).
 
        01  WS-STORY-TEXT-RECORD.
            05 WS-STORY-TEXT-EPISODE-ID         PIC 9(1).
@@ -105,7 +98,6 @@
        01  WS-STORY-CHOICE-RECORD.
            05 WS-STORY-CHOICE-EPISODE-ID       PIC 9(1).
            05 WS-STORY-CHOICE-STORY-ID         PIC 9(3).
-           05 WS-STORY-CHOICE-DEST-STORY-ID    PIC 9(3).
            05 WS-STORY-CHOICE-ID               PIC 9(1).
            05 WS-STORY-CHOICE-TEXT             PIC X(255).
 
@@ -136,14 +128,7 @@
 
 
        050-DEBUG-MESSAGE.
-           STRING WS-DEBUG-PREFIX DELIMITED BY SPACE
-               ' '   DELIMITED BY SIZE
-               WS-DEBUG-MSG DELIMITED BY SIZE
-               INTO WS-DEBUG-CONCAT
-           END-STRING
-
-           CALL 'SYSTEM' using WS-DEBUG-CONCAT.
-
+           call 'SYSTEM' using 'echo debug message to console'.
 
        100-MAIN-MENU.
 
@@ -198,9 +183,6 @@
                    NOT AT END
                        IF WS-STORY-START-EPISODE-ID = WS-CURRENT-EPISODE
 
-                           MOVE 'setting start info' TO WS-DEBUG-MSG
-                           PERFORM 050-DEBUG-MESSAGE
-
       *>   Probably more assignment here than necessary...
                            MOVE WS-STORY-START-STORY-ID
                                TO WS-CURRENT-RECORD
@@ -232,17 +214,10 @@
 
        325-RUN-STORY.
            PERFORM UNTIL WS-GAMEOVER
-
-               MOVE 'Running story' TO WS-DEBUG-MSG
-               PERFORM 050-DEBUG-MESSAGE
-
                PERFORM 350-READ-STORY
            END-PERFORM.
 
        350-READ-STORY.
-
-           MOVE 'Reading story page' TO WS-DEBUG-MSG
-           PERFORM 050-DEBUG-MESSAGE
 
            OPEN INPUT FD-STORY-FILE
                PERFORM UNTIL EOF-SW
@@ -252,10 +227,6 @@
                        NOT AT END
                            IF WS-EPISODE-ID = WS-CURRENT-EPISODE
                            AND WS-CURRENT-RECORD = WS-STORY-ID
-
-                               MOVE 'Found story record' TO WS-DEBUG-MSG
-                               PERFORM 050-DEBUG-MESSAGE
-
                                PERFORM 400-READ-STORY-TEXT
                                PERFORM 450-READ-STORY-CHOICES
                                PERFORM 500-HANDLE-STORY-IO
@@ -268,10 +239,6 @@
 
 
        400-READ-STORY-TEXT.
-
-           MOVE 'Reading story text for page.' TO WS-DEBUG-MSG
-           PERFORM 050-DEBUG-MESSAGE
-
            OPEN INPUT FD-STORY-TEXT-FILE
                PERFORM UNTIL EOF-SW OR RECORD-FOUND
                    READ FD-STORY-TEXT-FILE INTO WS-STORY-TEXT-RECORD
@@ -279,10 +246,6 @@
                        NOT AT END
                            IF WS-STORY-TEXT-ID = WS-STORY-ID
                            AND WS-STORY-TEXT-EPISODE-ID = WS-EPISODE-ID
-
-                               MOVE 'Found story text.' TO WS-DEBUG-MSG
-                               PERFORM 050-DEBUG-MESSAGE
-
                                MOVE 'Y' TO WS-STORY-RECORD-FOUND
                            END-IF
                    END-READ
@@ -293,9 +256,6 @@
 
        450-READ-STORY-CHOICES.
 
-           MOVE 'Reading story choices for page.' TO WS-DEBUG-MSG
-           PERFORM 050-DEBUG-MESSAGE
-
            OPEN INPUT FD-STORY-CHOICE-FILE
                PERFORM UNTIL EOF-SW OR RECORD-FOUND
                    READ FD-STORY-CHOICE-FILE INTO WS-STORY-CHOICE-RECORD
@@ -304,16 +264,9 @@
                            IF WS-STORY-CHOICE-STORY-ID = WS-STORY-ID
                            AND WS-STORY-CHOICE-EPISODE-ID
                                = WS-EPISODE-ID
-                               MOVE 'Found choice' TO WS-DEBUG-MSG
-                               PERFORM 050-DEBUG-MESSAGE
-
-                               MOVE WS-STORY-CHOICE-TEXT TO
-                                   WS-CHOICE-TEXT(WS-STORY-CHOICE-ID)
-
-                               MOVE WS-STORY-CHOICE-DEST-STORY-ID TO
-                                   WS-CHOICE-DESTINATION
-                                       (WS-STORY-CHOICE-ID)
-
+                               DISPLAY 'Not currently working!!!'
+      *                         MOVE WS-STORY-CHOICE-TEXT TO
+      *                             WS-CHOICES-TEXT(WS-STORY-CHOICE-ID)
       *                         IF WS-STORY-CHOICE-ID = 4
       *                             MOVE 'Y' TO WS-STORY-RECORD-FOUND
       *                         END-IF
@@ -326,20 +279,13 @@
 
 
        500-HANDLE-STORY-IO.
-
-           MOVE 'Displaying story page' TO WS-DEBUG-MSG
-           PERFORM 050-DEBUG-MESSAGE
-
            DISPLAY BLANK-SCREEN
            ACCEPT STORY-SCREEN
 
-           MOVE WS-CHOICE-DESTINATION( WS-STORY-INPUT)
-               TO WS-CURRENT-RECORD.
-
-      *     IF WS-STORY-INPUT NOT = WS-CORRECT-CHOICE-ID
-      *         MOVE 'Y' TO WS-GAMEOVER-SW
-      *     ELSE
-      *         MOVE WS-CORRECT-STORY-ID TO WS-CURRENT-RECORD
-      *     END-IF.
+           IF WS-STORY-INPUT NOT = WS-CORRECT-CHOICE-ID
+               MOVE 'Y' TO WS-GAMEOVER-SW
+           ELSE
+               MOVE WS-CORRECT-STORY-ID TO WS-CURRENT-RECORD
+           END-IF.
 
        END PROGRAM WRY-COBOL.
