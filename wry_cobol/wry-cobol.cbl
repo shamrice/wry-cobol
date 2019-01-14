@@ -34,8 +34,8 @@
 
        FD  FD-STORY-START-FILE.
        01  FD-STORY-START-FILE-RECORD.
-           05 EPISODE-ID                       PIC 9(1).
-           05 STORY-ID                         PIC 9(3).
+           05 STORY-START-EPISODE-ID           PIC 9(1).
+           05 STORY-START-STORY-ID             PIC 9(3).
 
        FD  FD-STORY-FILE.
        01  FD-STORY-RECORD.
@@ -182,8 +182,30 @@
                        AT END MOVE 'Y' TO WS-EOF-SW
                    NOT AT END
                        IF WS-STORY-START-EPISODE-ID = WS-CURRENT-EPISODE
-                           MOVE WS-STORY-START-RECORD
+
+      *>   Probably more assignment here than necessary...
+                           MOVE WS-STORY-START-STORY-ID
                                TO WS-CURRENT-RECORD
+
+                           MOVE WS-STORY-START-STORY-ID
+                               TO WS-STORY-ID
+
+                           MOVE WS-STORY-START-STORY-ID
+                               TO WS-STORY-TEXT-ID
+
+
+                           MOVE WS-CURRENT-EPISODE TO
+                               WS-STORY-TEXT-EPISODE-ID
+
+                           MOVE WS-STORY-START-STORY-ID
+                               TO WS-STORY-CHOICE-STORY-ID
+
+                          MOVE WS-STORY-START-EPISODE-ID
+                               TO WS-STORY-CHOICE-EPISODE-ID
+
+                           ACCEPT BLANK-SCREEN
+                           ACCEPT STORY-SCREEN
+
                        END-IF
                    END-READ
                END-PERFORM
@@ -198,7 +220,7 @@
                        AT END MOVE 'Y' TO WS-EOF-SW
                        NOT AT END
                            IF WS-EPISODE-ID = WS-CURRENT-EPISODE
-      *>                     AND WS-CURRENT-RECORD = WS-STORY-ID
+                           AND WS-CURRENT-RECORD = WS-STORY-ID
                                PERFORM 400-READ-STORY-TEXT
                                PERFORM 450-READ-STORY-CHOICES
                                PERFORM 500-HANDLE-STORY-IO
@@ -226,7 +248,6 @@
            MOVE 'N' TO WS-EOF-SW
            MOVE 'N' TO WS-STORY-RECORD-FOUND.
 
-
        450-READ-STORY-CHOICES.
 
            OPEN INPUT FD-STORY-CHOICE-FILE
@@ -237,11 +258,12 @@
                            IF WS-STORY-CHOICE-STORY-ID = WS-STORY-ID
                            AND WS-STORY-CHOICE-EPISODE-ID
                                = WS-EPISODE-ID
-                               MOVE WS-STORY-CHOICE-TEXT TO
-                                   WS-CHOICES-TEXT(WS-STORY-CHOICE-ID)
-                               IF WS-STORY-CHOICE-ID = 4
-                                   MOVE 'Y' TO WS-STORY-RECORD-FOUND
-                               END-IF
+                               DISPLAY 'Not currently working!!!'
+      *                         MOVE WS-STORY-CHOICE-TEXT TO
+      *                             WS-CHOICES-TEXT(WS-STORY-CHOICE-ID)
+      *                         IF WS-STORY-CHOICE-ID = 4
+      *                             MOVE 'Y' TO WS-STORY-RECORD-FOUND
+      *                         END-IF
                            END-IF
                    END-READ
                END-PERFORM
