@@ -215,6 +215,8 @@
                           MOVE WS-STORY-START-EPISODE-ID
                                TO WS-STORY-CHOICE-EPISODE-ID
 
+                           MOVE 'N' TO WS-GAMEOVER-SW
+
                            ACCEPT BLANK-SCREEN
                            ACCEPT STORY-SCREEN
 
@@ -225,7 +227,7 @@
            MOVE 'N' TO WS-EOF-SW.
 
        325-RUN-STORY.
-           PERFORM UNTIL WS-GAMEOVER
+           PERFORM UNTIL WS-GAMEOVER-SW = 'Y'
 
                MOVE 'Running story' TO WS-DEBUG-MSG
                PERFORM 050-DEBUG-MESSAGE
@@ -240,12 +242,12 @@
 
            OPEN INPUT FD-STORY-FILE
                PERFORM UNTIL EOF-SW
-      *>         OR WS-GAMEOVER
+               OR WS-GAMEOVER
                    READ FD-STORY-FILE INTO WS-STORY-RECORD
                        AT END MOVE 'Y' TO WS-EOF-SW
                        NOT AT END
-                           IF WS-EPISODE-ID = WS-CURRENT-EPISODE
-                           AND WS-CURRENT-RECORD = WS-STORY-ID
+      *>                     IF WS-EPISODE-ID = WS-CURRENT-EPISODE
+                           IF WS-CURRENT-RECORD = WS-STORY-ID
 
                                MOVE 'Found story record' TO WS-DEBUG-MSG
                                PERFORM 050-DEBUG-MESSAGE
@@ -257,8 +259,7 @@
                    END-READ
                END-PERFORM
            CLOSE FD-STORY-FILE
-           MOVE 'N' TO WS-EOF-SW
-           MOVE 'N' TO WS-GAMEOVER-SW.
+           MOVE 'N' TO WS-EOF-SW.
 
 
        400-READ-STORY-TEXT.
@@ -328,6 +329,10 @@
            ACCEPT STORY-SCREEN
 
            MOVE WS-CHOICE-DESTINATION(WS-STORY-INPUT)
-               TO WS-CURRENT-RECORD.
+               TO WS-CURRENT-RECORD
+
+           IF WS-CURRENT-RECORD = 999
+               MOVE 'Y' TO WS-GAMEOVER-SW
+           END-IF.
 
        END PROGRAM WRY-COBOL.

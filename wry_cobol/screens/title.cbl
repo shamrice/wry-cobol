@@ -35,7 +35,7 @@
            VALUE '                 A TEXTED BASED COMEDY'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                       Ver. 0.002'.
+           VALUE '                       Ver. 0.025'.
            05 LINE + 1.
            05 LINE + 1.
            05 LINE + 1.
@@ -51,7 +51,7 @@
       *> and Sim Creations Inc.'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                Nukem Enterprises  2018'.
+           VALUE '                Nukem Enterprises  2019'.
            05 LINE + 1.
            05 LINE + 1.
            05 LINE + 1.
