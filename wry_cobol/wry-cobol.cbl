@@ -47,7 +47,7 @@
        01  FD-STORY-TEXT-RECORD.
            05 STORY-TEXT-EPISODE-ID            PIC 9(1).
            05 STORY-TEXT-ID                    PIC 9(3).
-           05 STORY-TEXT                       PIC X(255).
+           05 STORY-TEXT                       PIC X(1000).
 
        FD  FD-STORY-CHOICE-FILE.
        01  FD-STORY-CHOICE-RECORD.
@@ -72,6 +72,8 @@
        77  WS-CURRENT-EPISODE                  PIC 9(1).
        77  WS-CURRENT-RECORD                   PIC 9(3).
 
+       77  WS-VALID-CHOICE                     PIC A(1) VALUE 'N'.
+
        01  WS-GAMEOVER-SW                      PIC A(1) VALUE 'N'.
            88 WS-GAMEOVER                      VALUE 'Y'.
 
@@ -94,7 +96,7 @@
        01  WS-STORY-TEXT-RECORD.
            05 WS-STORY-TEXT-EPISODE-ID         PIC 9(1).
            05 WS-STORY-TEXT-ID                 PIC 9(3).
-           05 WS-STORY-TEXT                    PIC X(255).
+           05 WS-STORY-TEXT                    PIC X(1000).
 
        01  WS-STORY-CHOICE-RECORD.
            05 WS-STORY-CHOICE-EPISODE-ID       PIC 9(1).
@@ -174,7 +176,8 @@
        105-RESET-STORY.
            MOVE 0 TO WS-EP-MENU-INPUT
            MOVE 0 TO WS-CURRENT-EPISODE
-           MOVE 000 TO WS-CURRENT-RECORD.
+           MOVE 000 TO WS-CURRENT-RECORD
+           MOVE 'N' TO WS-GAMEOVER-SW.
 
        110-RESET-MENU-INPUT.
            MOVE 0 TO WS-MENU-INPUT.
@@ -205,7 +208,6 @@
                            MOVE WS-STORY-START-STORY-ID
                                TO WS-STORY-TEXT-ID
 
-
                            MOVE WS-CURRENT-EPISODE TO
                                WS-STORY-TEXT-EPISODE-ID
 
@@ -215,10 +217,7 @@
                           MOVE WS-STORY-START-EPISODE-ID
                                TO WS-STORY-CHOICE-EPISODE-ID
 
-                           MOVE 'N' TO WS-GAMEOVER-SW
-
                            ACCEPT BLANK-SCREEN
-                           ACCEPT STORY-SCREEN
 
                        END-IF
                    END-READ
@@ -286,10 +285,16 @@
            MOVE 'N' TO WS-EOF-SW
            MOVE 'N' TO WS-STORY-RECORD-FOUND.
 
+
        450-READ-STORY-CHOICES.
 
            MOVE 'Reading story choices for page.' TO WS-DEBUG-MSG
            PERFORM 050-DEBUG-MESSAGE
+
+           MOVE 998 TO WS-CHOICE-DESTINATION(1)
+           MOVE 998 TO WS-CHOICE-DESTINATION(2)
+           MOVE 998 TO WS-CHOICE-DESTINATION(3)
+           MOVE 998 TO WS-CHOICE-DESTINATION(4)
 
            OPEN INPUT FD-STORY-CHOICE-FILE
                PERFORM UNTIL EOF-SW OR RECORD-FOUND
@@ -309,9 +314,6 @@
                                    WS-CHOICE-DESTINATION
                                        (WS-STORY-CHOICE-ID)
 
-      *                         IF WS-STORY-CHOICE-ID = 4
-      *                             MOVE 'Y' TO WS-STORY-RECORD-FOUND
-      *                         END-IF
                            END-IF
                    END-READ
                END-PERFORM
@@ -325,11 +327,25 @@
            MOVE 'Displaying story page' TO WS-DEBUG-MSG
            PERFORM 050-DEBUG-MESSAGE
 
-           DISPLAY BLANK-SCREEN
-           ACCEPT STORY-SCREEN
+           MOVE 'N' TO WS-VALID-CHOICE
 
-           MOVE WS-CHOICE-DESTINATION(WS-STORY-INPUT)
-               TO WS-CURRENT-RECORD
+           PERFORM UNTIL WS-VALID-CHOICE = 'Y'
+
+               DISPLAY BLANK-SCREEN
+               ACCEPT STORY-SCREEN
+
+               IF WS-STORY-INPUT NOT GREATER THAN 4
+
+                   MOVE WS-CHOICE-DESTINATION(WS-STORY-INPUT)
+                       TO WS-CURRENT-RECORD
+
+                   IF WS-CURRENT-RECORD NOT EQUAL 998
+                       MOVE 'Y' TO WS-VALID-CHOICE
+                   END-IF
+
+               END-IF
+
+           END-PERFORM
 
            IF WS-CURRENT-RECORD = 999
                MOVE 'Y' TO WS-GAMEOVER-SW

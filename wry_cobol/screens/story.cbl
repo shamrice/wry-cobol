@@ -29,7 +29,7 @@
 
 
 
-           05 STORY-OUTPUT PIC X(255) FROM WS-STORY-TEXT.
+           05 STORY-OUTPUT PIC X(1000) FROM WS-STORY-TEXT.
            05 LINE + 4.
 
            05 COL 4.
