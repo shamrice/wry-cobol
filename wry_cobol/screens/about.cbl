@@ -43,22 +43,40 @@
            'would have been a code rewrite of the stories that'.
            05 LINE + 1.
            05 COL 1, VALUE
-           'didnt crash due to stack overflow.'.
+           'didnt crash due to stack overflow.)'.
            05 LINE + 2.
            05 COL 1, VALUE
-           '  Some of the typos have been fixed from the original game'.
+           '  None of the typos have been fixed from the original game'.
            05 LINE + 1.
            05 COL 1, VALUE
-           'and unfortunately some of the interesting invalid '.
+           'and unfortunately all of the interesting invalid '.
            05 LINE + 1.
            05 COL 1, VALUE
-           'selection responses werent possible. Secrets may still be '.
+           'selection responses have been left out. Beating any of the'.
            05 LINE + 1.
            05 COL 1, VALUE
-           'found and beating any of the first three episodes will '.
+           'first three episodes will unlock the fourth one.'.
+           05 LINE + 2.
+           05 COL 1, VALUE
+           '  The data files used for this game were generated using a'.
            05 LINE + 1.
            05 COL 1, VALUE
-           'unlock the fourth one.'.
+           'Java application I wrote called wry-parser that parses the'.
+           05 LINE + 1.
+           05 COL 1, VALUE
+           'original Qbasic source file into usable objects that can'.
+           05 LINE + 1.
+           05 COL 1, VALUE
+           'then outputted to different types of formats. So this is a'.
+           05 LINE + 1.
+           05 COL 1, VALUE
+           'Qbasic game that was parsed by a Java application and'.
+           05 LINE + 1.
+           05 COL 1, VALUE
+           'output to data files read by a COBOL application.'.
+           05 LINE + 1.
+           05 COL 1, VALUE
+           'Completely unnecessary but it was still fun to make. :)'.
            05 LINE + 3.
            05 COL 5, VALUE 'Press enter to return to the main menu.'.
 
