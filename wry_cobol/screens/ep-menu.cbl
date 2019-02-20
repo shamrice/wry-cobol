@@ -43,7 +43,7 @@
            VALUE '                  3) Menal Condition'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                  4) Bewildered'.
+           VALUE '                  4) Bewildered (UNLOCKED)'.
            05 LINE + 2.
            05 COL 20, VALUE 'Selection: '.
            05 RESPONSE-INPUT PIC 9 TO WS-EP-MENU-INPUT.

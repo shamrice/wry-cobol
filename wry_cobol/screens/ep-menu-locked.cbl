@@ -1,4 +1,4 @@
-       01  TITLE-SCREEN.
+       01  EPISODE-MENU-LOCKED-SCREEN.
            05 VALUE '                    Nukem Enterprises'.
            05 LINE + 1.
            05 LINE + 1.
@@ -29,33 +29,21 @@
            05 LINE + 1.
            05 COL 1,
            VALUE '                 C    O    B    O    L'.
-           05 LINE + 1.
+           05 LINE + 2.
+           05 COL 1
+           VALUE '                   SELECT AN EPISODE'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                 A TEXTED BASED COMEDY'.
+           VALUE '                  1) Wry Humor'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                       Ver. 0.145'.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
+           VALUE '                  2) A Spy Adventure'.
            05 LINE + 1.
            05 COL 1
-           VALUE '          PRESS ENTER KEY TO GO TO THE MENU'.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
-      *> 05 VALUE 'WRY (R) is copyright of Nukem Enterprises
-      *> and Sim Creations Inc.'.
+           VALUE '                  3) Menal Condition'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                Nukem Enterprises  2019'.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 LINE + 1.
-           05 COL 1, LINE + 1.
-           05 RESPONSE-INPUT PIC X TO WS-TITLE-INPUT.
+           VALUE '                  4) Bewildered (LOCKED)'.
+           05 LINE + 2.
+           05 COL 20, VALUE 'Selection: '.
+           05 RESPONSE-INPUT PIC 9 TO WS-EP-MENU-INPUT.

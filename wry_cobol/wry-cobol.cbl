@@ -1,7 +1,6 @@
-
       *>*****************************************************************
       *> Author: Erik Eriksen
-      *> Date: 12/16/2018
+      *> Date: 12/16/2018 to 02/20/2019
       *> Purpose: Version of Wry written in COBOL
       *> Tectonics: cobc
       *>*****************************************************************
@@ -32,7 +31,9 @@
        DATA DIVISION.
 
        FILE SECTION.
-
+      *>****************************************************************
+      *> File descriptors for input data files.
+      *>****************************************************************
        FD  FD-STORY-START-FILE.
        01  FD-STORY-START-FILE-RECORD.
            05 STORY-START-EPISODE-ID           PIC 9(1).
@@ -59,6 +60,9 @@
 
        WORKING-STORAGE SECTION.
 
+      *>****************************************************************
+      *> Level 77 variables.
+      *>****************************************************************
        77  WS-DEBUG-PREFIX                     PIC X(5) VALUE 'echo'.
        77  WS-DEBUG-MSG                        PIC X(255).
        77  WS-DEBUG-CONCAT                     PIC X(300).
@@ -74,6 +78,13 @@
 
        77  WS-VALID-CHOICE                     PIC A(1) VALUE 'N'.
 
+       77  WS-FINAL-EPISODE-UNLOCKED           PIC A(1) VALUE 'N'.
+
+       77  WS-TAL-CTR                          PIC 9(2) VALUE 0.
+
+      *>****************************************************************
+      *> Conditional switches
+      *>****************************************************************
        01  WS-GAMEOVER-SW                      PIC A(1) VALUE 'N'.
            88 WS-GAMEOVER                      VALUE 'Y'.
 
@@ -81,6 +92,13 @@
            88 EOF-SW                           VALUE 'Y'.
            88 NOT-EOF-SW                       VALUE 'N'.
 
+       01  WS-STORY-RECORD-FOUND               PIC A(1) VALUE 'N'.
+           88 RECORD-FOUND                     VALUE 'Y'.
+           88 RECORD-NOT-FOUND                 VALUE 'N'.
+
+      *>****************************************************************
+      *> Working storage variables for contents of data files
+      *>****************************************************************
        01  WS-STORY-START-RECORD.
            05 WS-STORY-START-EPISODE-ID        PIC 9(1).
            05 WS-STORY-START-STORY-ID          PIC 9(3).
@@ -105,21 +123,27 @@
            05 WS-STORY-CHOICE-ID               PIC 9(1).
            05 WS-STORY-CHOICE-TEXT             PIC X(255).
 
-       01  WS-STORY-RECORD-FOUND               PIC A(1) VALUE 'N'.
-           88 RECORD-FOUND                     VALUE 'Y'.
-           88 RECORD-NOT-FOUND                 VALUE 'N'.
-
+      *>****************************************************************
+      *> I/O screens used to dislay the various screens of the game
+      *> and accept the input from each.
+      *>****************************************************************
        SCREEN SECTION.
 
        COPY 'screens/blank.cbl'.
        COPY 'screens/title.cbl'.
        COPY 'screens/ep-menu.cbl'.
+       COPY 'screens/ep-menu-locked.cbl'.
        COPY 'screens/menu.cbl'.
        COPY 'screens/about.cbl'.
        COPY 'screens/story.cbl'.
 
 
        PROCEDURE DIVISION.
+
+      *>****************************************************************
+      *> Main procedure is used to call the main menu. Once main menu
+      *> returns here, the stop run is reached and the program exits.
+      *>****************************************************************
        000-MAIN-PROCEDURE.
 
            ACCEPT TITLE-SCREEN
@@ -130,7 +154,10 @@
 
            STOP RUN.
 
-
+      *>****************************************************************
+      *> Paragraph used to display debug messages to the terminal while
+      *> the game is running.
+      *>****************************************************************
        050-DEBUG-MESSAGE.
            STRING WS-DEBUG-PREFIX DELIMITED BY SPACE
                ' '   DELIMITED BY SIZE
@@ -141,6 +168,20 @@
            CALL 'SYSTEM' using WS-DEBUG-CONCAT.
 
 
+      *>****************************************************************
+      *> Displays main menu screens and handles inputs.
+      *>
+      *> New game will reset the story variables and display either the
+      *> locked or unlocked episode select screen depending on if the
+      *> player has completed an episode already.
+      *> After the episode is selected, it will run the story until a
+      *> game over is reached and reset as needed.
+      *>
+      *> About will call the paragraph to display the about information.
+      *>
+      *> When a 3 is entered to exit the game, the game will fall back
+      *> to the main procedure paragraph and reach the stop run.
+      *>****************************************************************
        100-MAIN-MENU.
 
            DISPLAY BLANK-SCREEN
@@ -157,7 +198,15 @@
 
                PERFORM UNTIL WS-EP-MENU-INPUT <= 4
                AND WS-EP-MENU-INPUT > 0
-                   ACCEPT EPISODE-MENU-SCREEN
+                   IF WS-FINAL-EPISODE-UNLOCKED = 'N' THEN
+                       ACCEPT EPISODE-MENU-LOCKED-SCREEN
+                       IF WS-EP-MENU-INPUT = 4 THEN
+                           SET WS-EP-MENU-INPUT TO 9
+                       END-IF
+                   ELSE
+                       ACCEPT EPISODE-MENU-SCREEN
+                   END-IF
+
                END-PERFORM
 
                MOVE WS-EP-MENU-INPUT TO WS-CURRENT-EPISODE
@@ -173,19 +222,33 @@
                PERFORM 110-RESET-MENU-INPUT
            END-IF.
 
+      *>****************************************************************
+      *> Resets the variables related to the episode and story as well
+      *> as the menu input.
+      *>****************************************************************
        105-RESET-STORY.
            MOVE 0 TO WS-EP-MENU-INPUT
            MOVE 0 TO WS-CURRENT-EPISODE
            MOVE 000 TO WS-CURRENT-RECORD
            MOVE 'N' TO WS-GAMEOVER-SW.
 
+      *>****************************************************************
+      *> Resets the menu input variable back to zero.
+      *>****************************************************************
        110-RESET-MENU-INPUT.
            MOVE 0 TO WS-MENU-INPUT.
 
+      *>****************************************************************
+      *> Displays screen with the about game information.
+      *>****************************************************************
        200-ABOUT.
            DISPLAY BLANK-SCREEN
            ACCEPT ABOUT-SCREEN.
 
+      *>****************************************************************
+      *> Initializes the story for the episode selected based on the
+      *> the contents of the story start file.
+      *>****************************************************************
        300-READ-STORY-START.
 
            OPEN INPUT FD-STORY-START-FILE
@@ -225,6 +288,10 @@
            CLOSE FD-STORY-START-FILE
            MOVE 'N' TO WS-EOF-SW.
 
+      *>****************************************************************
+      *> Paragraph used to keep reading next pages in the story until
+      *> the game over flag is set.
+      *>****************************************************************
        325-RUN-STORY.
            PERFORM UNTIL WS-GAMEOVER-SW = 'Y'
 
@@ -234,6 +301,12 @@
                PERFORM 350-READ-STORY
            END-PERFORM.
 
+      *>****************************************************************
+      *> Builds each page of the story by calling paragraphs to build
+      *> the story page text, the story choices and to handle the
+      *> page I/O. The input from the I/O paragraph dictates the next
+      *> story page that is loaded and built.
+      *>****************************************************************
        350-READ-STORY.
 
            MOVE 'Reading story page' TO WS-DEBUG-MSG
@@ -245,7 +318,6 @@
                    READ FD-STORY-FILE INTO WS-STORY-RECORD
                        AT END MOVE 'Y' TO WS-EOF-SW
                        NOT AT END
-      *>                     IF WS-EPISODE-ID = WS-CURRENT-EPISODE
                            IF WS-CURRENT-RECORD = WS-STORY-ID
 
                                MOVE 'Found story record' TO WS-DEBUG-MSG
@@ -260,7 +332,10 @@
            CLOSE FD-STORY-FILE
            MOVE 'N' TO WS-EOF-SW.
 
-
+      *>****************************************************************
+      *> Reads story page text for current page into the story text
+      *> record.
+      *>****************************************************************
        400-READ-STORY-TEXT.
 
            MOVE 'Reading story text for page.' TO WS-DEBUG-MSG
@@ -285,7 +360,11 @@
            MOVE 'N' TO WS-EOF-SW
            MOVE 'N' TO WS-STORY-RECORD-FOUND.
 
-
+      *>****************************************************************
+      *> Reads and sets up the story page's choice's number and text
+      *>
+      *> Default values are set to 998 to flag empty choices as invalid
+      *>****************************************************************
        450-READ-STORY-CHOICES.
 
            MOVE 'Reading story choices for page.' TO WS-DEBUG-MSG
@@ -321,7 +400,14 @@
            MOVE 'N' TO WS-EOF-SW
            MOVE 'N' TO WS-STORY-RECORD-FOUND.
 
-
+      *>****************************************************************
+      *> Handles displaying output of the current stories page and
+      *> choices built in previous paragraphs.
+      *>
+      *> Handles user input on the story page and checks to see if
+      *> if they have won an episode. If so, the unlock flag is set
+      *> for episode 4.
+      *>****************************************************************
        500-HANDLE-STORY-IO.
 
            MOVE 'Displaying story page' TO WS-DEBUG-MSG
@@ -349,6 +435,18 @@
 
            IF WS-CURRENT-RECORD = 999
                MOVE 'Y' TO WS-GAMEOVER-SW
+
+               SET WS-TAL-CTR TO 0
+
+               INSPECT WS-STORY-TEXT
+                   TALLYING WS-TAL-CTR
+                   FOR ALL 'GAME OVER'
+
+               IF WS-TAL-CTR <= 0 THEN
+                   MOVE 'Episode won! Unlock!' TO WS-DEBUG-MSG
+                   PERFORM 050-DEBUG-MESSAGE
+                   SET WS-FINAL-EPISODE-UNLOCKED TO 'Y'
+               END-IF
            END-IF.
 
        END PROGRAM WRY-COBOL.
