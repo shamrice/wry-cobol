@@ -13,19 +13,19 @@
            FILE-CONTROL.
 
                SELECT FD-STORY-START-FILE
-                   ASSIGN TO '../data/story-start.dat'
+                   ASSIGN TO './data/story-start.dat'
                    ORGANIZATION IS LINE SEQUENTIAL.
 
                SELECT FD-STORY-FILE
-                   ASSIGN TO '../data/story.dat'
+                   ASSIGN TO './data/story.dat'
                    ORGANIZATION IS LINE SEQUENTIAL.
 
                SELECT FD-STORY-TEXT-FILE
-                   ASSIGN TO '../data/story-text.dat'
+                   ASSIGN TO './data/story-text.dat'
                    ORGANIZATION IS LINE SEQUENTIAL.
 
                SELECT FD-STORY-CHOICE-FILE
-                   ASSIGN TO '../data/story-choice.dat'
+                   ASSIGN TO './data/story-choice.dat'
                    ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.

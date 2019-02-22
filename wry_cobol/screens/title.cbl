@@ -35,7 +35,7 @@
            VALUE '                 A TEXTED BASED COMEDY'.
            05 LINE + 1.
            05 COL 1
-           VALUE '                       Ver. 0.145'.
+           VALUE '                       Ver. 1.145'.
            05 LINE + 1.
            05 LINE + 1.
            05 LINE + 1.
