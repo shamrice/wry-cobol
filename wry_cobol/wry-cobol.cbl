@@ -107,7 +107,7 @@
            88 EOF-STORY                        VALUE HIGH-VALUES.
            05 WS-EPISODE-ID                    PIC 9(1).
            05 WS-STORY-ID                      PIC 9(3).
-           05 WS-CHOICES                       OCCURS 0 TO 4 TIMES.
+           05 WS-CHOICES                       OCCURS 4 TIMES.
                10 WS-CHOICE-TEXT               PIC X(255).
                10 WS-CHOICE-DESTINATION        PIC 9(3).
 
@@ -421,6 +421,7 @@
                ACCEPT STORY-SCREEN
 
                IF WS-STORY-INPUT NOT GREATER THAN 4
+                   AND WS-STORY-INPUT GREATER THAN 0 THEN
 
                    MOVE WS-CHOICE-DESTINATION(WS-STORY-INPUT)
                        TO WS-CURRENT-RECORD
@@ -445,7 +446,7 @@
                IF WS-TAL-CTR <= 0 THEN
                    MOVE 'Episode won! Unlock!' TO WS-DEBUG-MSG
                    PERFORM 050-DEBUG-MESSAGE
-                   SET WS-FINAL-EPISODE-UNLOCKED TO 'Y'
+                   MOVE 'Y' TO WS-FINAL-EPISODE-UNLOCKED
                END-IF
            END-IF.
 
